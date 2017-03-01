@@ -21,14 +21,17 @@ immutable InferenceState{PGM<:ProbabilisticGraphicalModel}
     query::NodeNames
     evidence::Assignment
 
-    function InferenceState(pgm::ProbabilisticGraphicalModel, query::NodeNameUnion, evidence::Assignment=Assignment())
-        query = unique(convert(NodeNames, query))
+    function InferenceState(pgm::ProbabilisticGraphicalModel, query::NodeNames, evidence::Assignment=Assignment())
         _ensure_query_nodes_in_pgm_and_not_in_evidence(query, names(pgm), evidence)
-
         return new(pgm, query, evidence)
     end
 end
+function InferenceState{PGM<:ProbabilisticGraphicalModel}(pgm::PGM, query::NodeName, evidence::Assignment=Assignment())
+    query = unique(convert(NodeNames, query))
+    return InferenceState{PGM}(pgm, query, evidence)
+end
 
+Base.names(inf::InferenceState) = inf.query
 function Base.show(io::IO, inf::InferenceState)
     println(io, "Query: $(inf.query)")
     println(io, "Evidence:")
