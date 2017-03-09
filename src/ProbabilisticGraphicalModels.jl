@@ -27,7 +27,8 @@ export
 
     # Common Functions that are not in Base or required packages
     markov_blanket,
-    is_independent
+    is_independent,
+    consistent
 
 include("nodenames.jl")
 include("assignments.jl")
@@ -99,7 +100,7 @@ end
 """
 The pdf of a set of assignments after conditioning on the values
 """
-Distributions.pdf(pgm::ProbabilisticGraphicalModel, df::DataFrame) = exp(logpdf(bn, df))
+Distributions.pdf(pgm::ProbabilisticGraphicalModel, df::DataFrame) = exp(logpdf(pgm, df))
 
 
 include("sampling.jl")

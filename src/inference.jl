@@ -3,14 +3,14 @@ Abstract type for probability inference
 """
 abstract InferenceMethod
 
-@inline function _ensure_query_nodes_in_pgm_and_not_in_evidence(qs::NodeNames, nodenames::NodeNames, ev::Assignment)
-    isempty(qs) && return
+@inline function _ensure_query_nodes_in_pgm_and_not_in_evidence(query::NodeNames, nodenames::NodeNames, evidence::Assignment)
+    isempty(query) && return
 
-    q = first(qs)
-    (q in nodenames) || throw(ArgumentError("Query $q is not in the probabilistic graphical model"))
-    haskey(ev, q) && throw(ArgumentError("Query $q is part of the evidence"))
+    q = first(query)
+    (q ∈ nodenames) || throw(ArgumentError("Query $q is not in the probabilistic graphical model"))
+    haskey(evidence, q) && throw(ArgumentError("Query $q is part of the evidence"))
 
-    return _ensure_query_nodes_in_pgm_and_not_in_evidence(qs[2:end], nodenames, ev)
+    return _ensure_query_nodes_in_pgm_and_not_in_evidence(query[2:end], nodenames, evidence)
 end
 
 """
@@ -21,15 +21,17 @@ immutable InferenceState{PGM<:ProbabilisticGraphicalModel}
     query::NodeNames
     evidence::Assignment
 
-    function InferenceState(pgm::ProbabilisticGraphicalModel, query::NodeNames, evidence::Assignment=Assignment())
+    function InferenceState(pgm::PGM, query::NodeNames, evidence::Assignment)
+
         _ensure_query_nodes_in_pgm_and_not_in_evidence(query, names(pgm), evidence)
         return new(pgm, query, evidence)
     end
 end
-function InferenceState{PGM<:ProbabilisticGraphicalModel}(pgm::PGM, query::NodeName, evidence::Assignment=Assignment())
+function InferenceState{PGM<:ProbabilisticGraphicalModel}(pgm::PGM, query::NodeNameUnion, evidence::Assignment=Assignment())
     query = unique(convert(NodeNames, query))
     return InferenceState{PGM}(pgm, query, evidence)
 end
+
 
 Base.names(inf::InferenceState) = inf.query
 function Base.show(io::IO, inf::InferenceState)
@@ -45,4 +47,4 @@ end
 Infer p(query|evidence)
 """
 infer(im::InferenceMethod, inf::InferenceState) = error("infer not implemented for $(typeof(im)) and $(typeof(inf))")
-infer(im::InferenceMethod, pgm::ProbabilisticGraphicalModel, query::NodeNameUnion; evidence::Assignment=Assignment()) = infer(im, InferenceState(bn, query, evidence))
+infer(im::InferenceMethod, pgm::ProbabilisticGraphicalModel, query::NodeNameUnion; evidence::Assignment=Assignment()) = infer(im, InferenceState(pgm, query, evidence))
