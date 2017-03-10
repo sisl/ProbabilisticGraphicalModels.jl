@@ -33,7 +33,6 @@ function InferenceState{PGM<:ProbabilisticGraphicalModel}(pgm::PGM, query::NodeN
 end
 
 
-Base.names(inf::InferenceState) = inf.query
 function Base.show(io::IO, inf::InferenceState)
     println(io, "Query: $(inf.query)")
     println(io, "Evidence:")
